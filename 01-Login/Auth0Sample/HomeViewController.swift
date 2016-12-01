@@ -29,14 +29,16 @@ class HomeViewController: UIViewController {
     // MARK: - IBAction
     
     @IBAction func showLoginController(_ sender: UIButton) {
-        let controller = A0Lock.shared().newLockViewController()
-        controller?.closable = true
-        controller?.onAuthenticationBlock = { profile, token in
+        let controller = A0Lock.sharedLock().newLockViewController()
+        controller.closable = true
+        controller.onAuthenticationBlock = { profile, token in
             guard let userProfile = profile else {
                 self.showMissingProfileAlert()
                 return
             }
+            NSLog("Token \(token)")
             self.retrievedProfile = userProfile
+            self.token = token
             controller?.dismiss(animated: true, completion: nil)
             self.performSegue(withIdentifier: "ShowProfile", sender: nil)
         }
@@ -53,11 +55,13 @@ class HomeViewController: UIViewController {
             return
         }
         profileController.profile = self.retrievedProfile
+        profileController.token = self.token
     }
     
     // MARK: - Private
     
     fileprivate var retrievedProfile: A0UserProfile!
+    fileprivate var token: A0Token!
     
     fileprivate func showMissingProfileAlert() {
         let alert = UIAlertController(title: "Error", message: "Could not retrieve profile", preferredStyle: .alert)

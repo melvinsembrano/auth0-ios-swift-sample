@@ -49,6 +49,9 @@ class ProfileViewController: UIViewController {
             let _ = self.navigationController?.popViewController(animated: true)
             return
         }
+        // submitLogin(idToken)
+        
+        
         Auth0
             .authentication()
             .tokenInfo(token: idToken)
@@ -56,7 +59,6 @@ class ProfileViewController: UIViewController {
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let profile):
-                        
                         self.welcomeLabel.text = "Welcome, \(profile.name)"
                         self.retrieveDataFromURL(profile.pictureURL) { data, response, error in
                             DispatchQueue.main.async {
@@ -70,6 +72,34 @@ class ProfileViewController: UIViewController {
                     }
                 }
         }
+    }
+
+    func submitLogin(accessToken: String) {
+        let url = NSURL(string: "http://10.11.7.128/api/v2/authenticate")!
+        let request = NSMutableURLRequest(URL: url);
+        request.HTTPMethod = "POST";
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue(accessToken, forHTTPHeaderField: "Access-Token")
+        
+        
+        request.HTTPBody = "".dataUsingEncoding(NSUTF8StringEncoding);
+        
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request) { data, response, error in
+            if let response = response, data = data {
+                print(response)
+                print(String(data: data, encoding: NSUTF8StringEncoding))
+                
+                dispatch_sync(dispatch_get_main_queue()){
+                    
+                }
+                
+            } else {
+                print("Error: \(error)")
+            }
+        }
+        
+        task.resume()
     }
     
     fileprivate func retrieveDataFromURL(_ url:URL, completion: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: NSError? ) -> Void)) {
